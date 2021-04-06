@@ -1,0 +1,354 @@
+nelmio_api_doc:
+    documentation:
+        openapi: 3.0.0
+        basePath: /api/1
+        schemes:
+            - https
+        servers:
+            - url: https://127.0.0.1:8000/api/1
+              description: Version 1
+        info:
+            description: |
+                Test task API
+                If you want to test it you should authorize with any User UUID from fixture-created DB (1be3856a-2708-4fdf-b9aa-3c76167c564a)
+            version: api_v1
+            title: Test API
+            contact:
+                email: you@your-company.com
+        securityDefinitions:
+            api_key:
+                type: apiKey
+                name: 'X-AUTH-TOKEN'
+                in: header
+        security:
+            - api_key: [ ]
+        paths:
+            /products:
+                get:
+                    description: 'List all existing products. List divided by pages.'
+                    parameters:
+                        - in: query
+                          name: page
+                          description: 'Numebr of page in pagination, starts with 1. Default is 1.'
+                          required: false
+                          schema:
+                              type: integer
+                        - in: query
+                          name: perpage
+                          description: 'Numebr of products on page. Default is 3. Max value is 3'
+                          required: false
+                          schema:
+                              type: integer
+                    responses:
+                        '200':
+                            description: 'List of product, paginated'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/ProductList'
+                        '400':
+                            description: 'Returned in case maximum perpage value exceed limit (3).'
+                        '401':
+                            description: 'Authorisation required'
+                post:
+                    description: 'Add new product. Product title should be unique!'
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    $ref: '#/components/schemas/CreateProduct'
+                    parameters:
+                        -   in: body
+                            name: productDescription
+                            schema:
+                                type: object
+                                required:
+                                    - title
+                                    - price
+                                    - currencyCode
+                                properties:
+                                    title:
+                                        type: string
+                                    price:
+                                        type: number
+                                    currencyCode:
+                                        type: string
+                    responses:
+                        '201':
+                            description: 'ID of newly created product'
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            productId:
+                                                type: integer
+                                        required:
+                                            - productId
+                                        additionalProperties:
+                                            type: integer
+                        '400':
+                            description: 'Returned in case product validation failed or product with the same name already exist.'
+                        '401':
+                            description: 'Authorisation required'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+            /products/{productId}:
+                get:
+                    description: 'Get the details of the certain product.'
+                    parameters:
+                        - in: path
+                          name: productId
+                          description: 'Product id'
+                          required: true
+                          schema:
+                              type: integer
+                    responses:
+                        '200':
+                            description: 'Certain product details'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/Product'
+                        '404':
+                            description: 'Returned in case product not found'
+                        '401':
+                            description: 'Authorisation required'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+                patch:
+                    description: 'Update certain product.'
+                    requestBody:
+                        content:
+                            application/json:
+                                schema:
+                                    $ref: '#/components/schemas/UpdateProduct'
+                    parameters:
+                        -   in: path
+                            name: productId
+                            description: 'Product id'
+                            required: true
+                            schema:
+                                type: integer
+                        -   in: body
+                            name: productDescription
+                            schema:
+                                type: object
+                                properties:
+                                    title:
+                                        type: string
+                                    price:
+                                        type: number
+                                    currencyCode:
+                                        type: string
+                    responses:
+                        '201':
+                            description: 'Product updated'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/Product'
+                        '400':
+                            description: 'Returned in case product validation failed or product with the same name already exist.'
+                        '401':
+                            description: 'Authorisation required'
+                        '404':
+                            description: 'Returned in case product not found'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+                delete:
+                    description: 'Remove certain product.'
+                    parameters:
+                        - in: path
+                          name: productId
+                          description: 'Product id'
+                          required: true
+                          schema:
+                              type: integer
+                    responses:
+                        '200':
+                            description: 'Product was deleted'
+                            content:
+                                text/plain:
+                                    schema:
+                                        type: string
+                                        example: Ok
+                        '401':
+                            description: 'Authorisation required'
+                        '404':
+                            description: 'Returned in case product not found'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+            /cart:
+                post:
+                    description: 'Create new cart. Cart will be assigned to the current user.'
+                    responses:
+                        '201':
+                            description: 'Summary of the newly created cart'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/CartSummary'
+                        '401':
+                            description: 'Authorisation required'
+            /cart/{cartId}:
+                get:
+                    description: 'Get cart details. Total amount grouped by currency'
+                    parameters:
+                        - in: path
+                          name: cartId
+                          description: 'Cart id'
+                          required: true
+                          schema:
+                              type: integer
+                    responses:
+                        '200':
+                            description: 'Cart details'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/CartSummary'
+                        '401':
+                            description: 'Authorisation required'
+                        '404':
+                            description: 'Returned in case cart not found or cart with requested Id belongs to different user'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+
+            /cart/{cartId}/add/{productId}/{quantity}:
+                patch:
+                    description: 'Add specified quantity of product into the cart'
+                    parameters:
+                        - in: path
+                          name: cartId
+                          description: 'Cart id'
+                          required: true
+                          schema:
+                              type: integer
+                        - in: path
+                          name: productId
+                          description: 'product id'
+                          required: true
+                          schema:
+                              type: integer
+                        - in: path
+                          name: quantity
+                          description: 'Quantity of the product'
+                          required: true
+                          schema:
+                              type: integer
+                    responses:
+                        '201':
+                            description: Product was added into cart'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/CartSummary'
+                        '400':
+                            description: 'Returned in case cart limitation exceed'
+                        '401':
+                            description: 'Authorisation required'
+                        '404':
+                            description: 'Returned in case cart or product not found or cart with requested Id belongs to different user'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+            /cart/{cartId}/remove/{productId}:
+                patch:
+                    description: 'Remove specified product from the cart'
+                    parameters:
+                        - in: path
+                          name: cartId
+                          description: 'Cart id'
+                          required: true
+                          schema:
+                              type: integer
+                        - in: path
+                          name: productId
+                          description: 'product id'
+                          required: true
+                          schema:
+                              type: integer
+                    responses:
+                        '200':
+                            description: Product was removed from card'
+                            content:
+                                application/json:
+                                    schema:
+                                        $ref: '#/components/schemas/CartSummary'
+                        '401':
+                            description: 'Authorisation required'
+                        '404':
+                            description: 'Returned in case cart or product not found or cart with requested Id belongs to different user'
+                        '500':
+                            description: 'Returned in case of unexpected server error.'
+        components:
+            schemas:
+                Product:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            format: int64
+                        title:
+                            type: string
+                            example: 'Wiedźmin'
+                        price:
+                            type: number
+                        currencyCode:
+                            type: string
+                            example: 'EUR'
+                    description: Product description
+                ProductList:
+                    type: object
+                    properties:
+                        productList:
+                            $ref: '#/components/schemas/Product'
+                    description: List of products
+                CartSummary:
+                    type: object
+                    properties:
+                        id:
+                            type: integer
+                            format: int64
+                        productCoount:
+                            type: integer
+                            format: int64
+                        itemsCount:
+                            type: integer
+                            format: int64
+                        totalAmount:
+                            $ref: '#/components/schemas/PerCurrency'
+                        productList:
+                            $ref: '#/components/schemas/Product'
+                    description: List of products
+                PerCurrency:
+                    type: object
+                    additionalProperties:
+                        type: string
+                UpdateProduct:
+                    type: object
+                    properties:
+                        title:
+                            type: string
+                        price:
+                            type: number
+                        currencyCode:
+                            type: string
+                CreateProduct:
+                    type: object
+                    required:
+                        - title
+                        - price
+                        - currencyCode
+                    properties:
+                        title:
+                            type: string
+                        price:
+                            type: number
+                        currencyCode:
+                            type: string
+    areas: # to filter documented areas
+        path_patterns:
+# This library supports OpenApi v2.0 only, so, I switched off automatic action and described apis above
+#            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^!/

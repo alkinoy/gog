@@ -1,0 +1,21 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+api:
+  resource: 'routes/api_v1.yaml'
+  prefix: /api/1
+
+app.swagger_ui:
+  path: /api/doc
+  methods: GET
+  defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
+app.swagger:
+  path: /api/doc.json
+  methods: GET
+  defaults: { _controller: nelmio_api_doc.controller.swagger }
+
+ping:
+  path: /ping
+  controller: App\Controller\PingController::ping
+  methods: GET

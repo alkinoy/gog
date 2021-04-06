@@ -1,0 +1,59 @@
+products:
+  path: /products
+  controller: App\Controller\ProductApiController::getProductList
+  methods: get
+
+create_product:
+  path: /products
+  controller: App\Controller\ProductApiController::createProduct
+  methods: post
+
+product:
+  path: /products/{productId}
+  controller: App\Controller\ProductApiController::getProduct
+  methods: get
+  requirements:
+    productId: '\d+'
+
+update_product:
+  path: /products/{productId}
+  controller: App\Controller\ProductApiController::updateProduct
+  methods: patch
+  requirements:
+    productId: '\d+'
+
+remove_product:
+  path: /products/{productId}
+  controller: App\Controller\ProductApiController::removeProduct
+  methods: delete
+  requirements:
+    productId: '\d+'
+
+create_cart:
+  path: /cart
+  controller: App\Controller\CartApiController::createCart
+  methods: post
+
+add_product_into_cart:
+  path: /cart/{cartId}/add/{productId}/{quantity}
+  controller: App\Controller\CartApiController::addProductIntoCart
+  methods: patch
+  requirements:
+    cartId: '\d+'
+    productId: '\d+'
+    quantity: '\d+'
+
+remove_product_from_cart:
+  path: /cart/{cartId}/remove/{productId}
+  controller: App\Controller\CartApiController::removeProductFromCart
+  methods: patch
+  requirements:
+    cartId: '\d+'
+    productId: '\d+'
+
+list_products_in_cart:
+  path: /cart/{cartId}
+  controller: App\Controller\CartApiController::listProductsInCart
+  methods: get
+  requirements:
+    cartId: '\d+'

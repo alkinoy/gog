@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+
+  db_dev:
+    image: mysql:8.0.23
+    #        volumes:
+    #          - "./volumes/mysql_dev:/var/lib/mysql"
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=gog
+      - MYSQL_DATABASE=gog
+      - MYSQL_USER=gog
+      - MYSQL_PASSWORD=gog
+
+  statistic:
+    image: samuelebistoletti/docker-statsd-influxdb-grafana:latest
+    ports:
+      - "3003:3003"
+      - "3004:8888"
+      - "8086:8086"
+      - "8125:8125/udp"
