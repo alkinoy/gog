@@ -79,9 +79,9 @@ php bin/phpunit
 ```
 
 I hope here will be all right.
-[](https://i.imgur.com/cLrvUpK.png)
+![](https://i.imgur.com/cLrvUpK.png)
 
-[](https://i.imgur.com/ESp0IYQ.png)
+![](https://i.imgur.com/ESp0IYQ.png)
 
 Open Swagger doc page and enjoy! Pay attention on Swagger Authorisation, use example UUID.
 ```
